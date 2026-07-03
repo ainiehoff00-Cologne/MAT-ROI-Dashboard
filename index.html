@@ -3,61 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MolAquaTech – ROI Rechner & Pilot Tracking Dashboard</title>
+    <title>MATpure – Interaktiver ROI-Kalkulator</title>
     <!-- Google Fonts for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for beautiful icons -->
+    <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Tailored color palette */
-            --bg-main: #090d16;
-            --bg-card: rgba(17, 24, 39, 0.7);
-            --bg-card-hover: rgba(23, 32, 53, 0.85);
+            /* Tailored color palette (Glassmorphic Dark Mode) */
+            --bg-main: #060913;
+            --bg-card: rgba(15, 23, 42, 0.65);
+            --bg-card-hover: rgba(22, 34, 61, 0.85);
             --border-color: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(6, 182, 212, 0.15);
+            --border-glow: rgba(6, 182, 212, 0.2);
             
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
             
-            --color-primary: #06b6d4;      /* Cyan (Water / Technology) */
+            --color-primary: #06b6d4;      /* Cyan (MATpure Technology) */
             --color-secondary: #10b981;    /* Emerald (Savings / ROI) */
-            --color-accent: #f59e0b;       /* Amber (Inputs / Warning) */
-            --color-danger: #ef4444;       /* Red (Costs) */
-            
-            --color-primary-rgb: 6, 182, 212;
-            --color-secondary-rgb: 16, 185, 129;
-            --color-accent-rgb: 245, 158, 11;
+            --color-accent: #f59e0b;       /* Amber (Sliders) */
+            --color-danger: #ef4444;       /* Red (Current Costs) */
             
             --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
             --gradient-savings: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --gradient-dark: linear-gradient(180deg, #111827 0%, #030712 100%);
             
             --font-display: 'Outfit', sans-serif;
             --font-body: 'Plus Jakarta Sans', sans-serif;
             
-            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-            --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.15);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 25px rgba(6, 182, 212, 0.15);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
         }
 
         body {
             background-color: var(--bg-main);
             background-image: 
-                radial-gradient(at 10% 10%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.07) 0px, transparent 50%);
             background-attachment: fixed;
             color: var(--text-primary);
             font-family: var(--font-body);
@@ -66,20 +59,20 @@
             overflow-x: hidden;
         }
 
-        /* Container Layout */
+        /* App Layout */
         .app-container {
             display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar Styling */
+        /* Sidebar for inputs */
         .sidebar {
-            width: 380px;
-            background: rgba(10, 15, 26, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            width: 420px;
+            background: rgba(8, 12, 22, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid var(--border-color);
-            padding: 2rem 1.5rem;
+            padding: 2rem 1.75rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
@@ -94,7 +87,7 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .logo-icon {
@@ -110,7 +103,7 @@
             font-size: 1.6rem;
             font-weight: 800;
             letter-spacing: -0.5px;
-            background: linear-gradient(to right, #ffffff, #9ca3af);
+            background: linear-gradient(to right, #ffffff, #cbd5e1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -128,34 +121,32 @@
             font-weight: 700;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             padding-bottom: 0.5rem;
-            margin-top: 0.5rem;
         }
 
-        /* Inputs Container */
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
+            gap: 1.15rem;
         }
 
         .control-item {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.03);
             border-radius: 12px;
-            padding: 1rem;
+            padding: 0.85rem 1rem;
             transition: all 0.2s ease;
         }
 
         .control-item:hover {
             background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.25);
         }
 
         .control-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
         .control-label {
@@ -171,6 +162,20 @@
             background: rgba(6, 182, 212, 0.1);
             padding: 2px 8px;
             border-radius: 6px;
+        }
+
+        /* Custom highlight for Amortization slider */
+        .control-item.highlight-amort {
+            background: rgba(16, 185, 129, 0.04);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+        .control-item.highlight-amort:hover {
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .control-item.highlight-amort .control-value {
+            color: var(--color-secondary);
+            background: rgba(16, 185, 129, 0.12);
         }
 
         .control-input {
@@ -194,8 +199,13 @@
             transition: transform 0.1s ease;
         }
 
+        .control-item.highlight-amort .control-input::-webkit-slider-thumb {
+            background: var(--color-secondary);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
         .control-input::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            transform: scale(1.25);
         }
 
         .control-note {
@@ -205,14 +215,14 @@
             display: block;
         }
 
-        /* Main Content Styling */
+        /* Main Content */
         .main-content {
             flex: 1;
             padding: 2rem 2.5rem;
             display: flex;
             flex-direction: column;
             gap: 2rem;
-            max-width: 1400px;
+            max-width: 1300px;
             margin: 0 auto;
             width: 100%;
         }
@@ -240,55 +250,28 @@
             margin-top: 0.25rem;
         }
 
-        /* Tabs Navigation */
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 4px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            width: fit-content;
-        }
-
-        .tab-btn {
-            background: transparent;
+        .btn-pdf {
+            background: var(--gradient-savings);
             border: none;
-            color: var(--text-secondary);
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-size: 0.9rem;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+            transition: all 0.2s ease;
         }
 
-        .tab-btn:hover {
-            color: var(--text-primary);
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
         }
 
-        .tab-btn.active {
-            background: rgba(6, 182, 212, 0.15);
-            color: var(--color-primary);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(6, 182, 212, 0.2);
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s ease forwards;
-        }
-
-        .tab-content.active {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        /* KPI Cards Grid */
+        /* KPI Grid */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -323,7 +306,7 @@
         .kpi-card:hover {
             transform: translateY(-4px);
             background: var(--bg-card-hover);
-            border-color: rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.25);
             box-shadow: var(--shadow-glow), var(--shadow-lg);
         }
 
@@ -332,7 +315,7 @@
         }
         .kpi-card.kpi-highlight:hover {
             border-color: rgba(16, 185, 129, 0.3);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), var(--shadow-lg);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15), var(--shadow-lg);
         }
 
         .kpi-card.kpi-cyan::before {
@@ -354,7 +337,7 @@
         }
 
         .kpi-icon {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             color: var(--text-muted);
             width: 32px;
             height: 32px;
@@ -377,7 +360,7 @@
 
         .kpi-value {
             font-family: var(--font-display);
-            font-size: 2.2rem;
+            font-size: 2.1rem;
             font-weight: 800;
             letter-spacing: -1px;
         }
@@ -390,14 +373,10 @@
             gap: 4px;
         }
 
-        .kpi-detail i {
-            font-size: 0.75rem;
-        }
-
-        /* Dashboard Main Layout (Charts & Tables) */
+        /* Main Dashboard Grid */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 3fr 2fr;
             gap: 1.5rem;
         }
 
@@ -431,7 +410,7 @@
             width: 100%;
         }
 
-        /* List Cards / Cost Breakdown */
+        /* Cost breakdown card */
         .breakdown-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -443,17 +422,21 @@
             gap: 1.25rem;
         }
 
+        .breakdown-title-container {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.75rem;
+        }
+
         .breakdown-title {
             font-family: var(--font-display);
             font-size: 1.2rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
         }
 
         .cost-list {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.65rem;
         }
 
         .cost-row {
@@ -464,12 +447,6 @@
             background: rgba(255, 255, 255, 0.01);
             border: 1px solid rgba(255, 255, 255, 0.02);
             border-radius: 10px;
-            transition: background 0.2s ease;
-        }
-
-        .cost-row:hover {
-            background: rgba(255, 255, 255, 0.03);
-            border-color: rgba(255, 255, 255, 0.05);
         }
 
         .cost-info {
@@ -505,79 +482,8 @@
             color: var(--color-danger);
         }
 
-        /* Rollout Section */
-        .rollout-card {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.04) 0%, rgba(6, 182, 212, 0.04) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.15);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .rollout-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .rollout-text h3 {
-            font-family: var(--font-display);
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #10b981, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .rollout-text p {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-top: 4px;
-        }
-
-        .rollout-stats {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-        }
-
-        .rollout-stat-box {
-            background: rgba(10, 15, 26, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .rollout-stat-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .rollout-stat-val {
-            font-family: var(--font-display);
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .rollout-stat-val.highlight {
-            color: var(--color-secondary);
-        }
-
-        /* Pilot Tracking Tab Styling */
-        .pilot-layout {
-            display: grid;
-            grid-template-columns: 3fr 2fr;
-            gap: 1.5rem;
-        }
-
-        .pilot-table-card {
+        /* Assumptions / transparent guidelines */
+        .assumptions-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
@@ -585,83 +491,253 @@
             box-shadow: var(--shadow-lg);
         }
 
-        .pilot-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
+        .assumptions-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .pilot-table th, .pilot-table td {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.85rem;
+        .assumptions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
         }
 
-        .pilot-table th {
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
+        .assumption-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-left: 12px;
+            border-left: 2px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .assumption-label {
             font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .pilot-input {
-            width: 80px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            padding: 6px 10px;
+        .assumption-val {
+            font-size: 0.85rem;
             color: var(--text-primary);
+        }
+
+        /* Modal Overlay & Lead Capture */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            width: 480px;
+            padding: 2.25rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: color 0.1s ease;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .modal-header h3 {
             font-family: var(--font-display);
+            font-size: 1.4rem;
             font-weight: 700;
+            color: white;
+        }
+
+        .modal-header p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
             outline: none;
             transition: all 0.2s ease;
         }
 
-        .pilot-input:focus {
+        .form-input:focus {
             border-color: var(--color-primary);
-            background: rgba(6, 182, 212, 0.1);
+            background: rgba(6, 182, 212, 0.05);
             box-shadow: 0 0 5px rgba(6, 182, 212, 0.3);
         }
 
-        .pilot-change-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 700;
+        .form-checkbox-label {
             font-size: 0.75rem;
-        }
-
-        .pilot-change-badge.positive {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--color-secondary);
-        }
-
-        .pilot-change-badge.negative {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--color-danger);
-        }
-
-        .pilot-change-badge.neutral {
-            background: rgba(255, 255, 255, 0.05);
             color: var(--text-secondary);
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            cursor: pointer;
+        }
+
+        .form-checkbox-label input {
+            margin-top: 3px;
+        }
+
+        .btn-submit {
+            background: var(--gradient-savings);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+        }
+
+        /* Printable Layout styles (Hidden on screen) */
+        #print-header {
+            display: none;
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print Media queries */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .sidebar, .btn-pdf, .modal-overlay {
+                display: none !important;
+            }
+            .app-container {
+                display: block;
+            }
+            .main-content {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            #print-header {
+                display: block !important;
+                border-bottom: 2px solid #0f172a;
+                padding-bottom: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            .kpi-card {
+                border: 1px solid #e2e8f0 !important;
+                background: #f8fafc !important;
+                box-shadow: none !important;
+                color: black !important;
+                page-break-inside: avoid;
+            }
+            .kpi-title, .kpi-detail {
+                color: #475569 !important;
+            }
+            .kpi-value {
+                color: #0f172a !important;
+            }
+            .dashboard-grid {
+                display: block !important;
+            }
+            .chart-box, .breakdown-card, .assumptions-card {
+                border: 1px solid #e2e8f0 !important;
+                background: white !important;
+                box-shadow: none !important;
+                color: black !important;
+                margin-bottom: 2rem;
+                page-break-inside: avoid;
+            }
+            .chart-title, .breakdown-title, .assumptions-title {
+                color: #0f172a !important;
+            }
+            .cost-row {
+                background: #f8fafc !important;
+                border-color: #cbd5e1 !important;
+            }
+            .cost-formula {
+                color: #64748b !important;
+            }
+            .min-val {
+                color: #475569 !important;
+            }
+            .max-val {
+                color: #991b1b !important;
+            }
+            .assumption-item {
+                border-left-color: #0284c7 !important;
+            }
+            .assumption-label {
+                color: #475569 !important;
+            }
+            .assumption-val {
+                color: black !important;
+            }
+            footer {
+                color: #64748b !important;
+                border-top: 1px solid #e2e8f0 !important;
             }
         }
 
-        /* Responsive Design */
-        @media (max-width: 1400px) {
+        /* Responsive UI */
+        @media (max-width: 1180px) {
             .app-container {
                 flex-direction: column;
             }
@@ -670,20 +746,11 @@
                 height: auto;
                 position: relative;
             }
-            .main-content {
-                padding: 1.5rem;
-            }
-        }
-
-        @media (max-width: 1024px) {
             .kpi-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .dashboard-grid, .pilot-layout {
+            .dashboard-grid {
                 grid-template-columns: 1fr;
-            }
-            .rollout-stats {
-                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -691,7 +758,7 @@
             .kpi-grid {
                 grid-template-columns: 1fr;
             }
-            .rollout-stats {
+            .assumptions-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -699,16 +766,17 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar controls (Inputs) -->
+        <!-- Sidebar controls (Public Sliders) -->
         <aside class="sidebar">
             <div class="logo-container">
                 <i class="fa-solid fa-droplet logo-icon"></i>
-                <div class="logo-text">MolAqua<span>Tech</span></div>
+                <div class="logo-text">MAT<span>pure</span></div>
             </div>
             
-            <!-- Section: Hotelprofil -->
-            <div class="sidebar-title">EINGABEN – Hotelprofil</div>
+            <div class="sidebar-title">Kalkulations-Eingaben</div>
+            
             <div class="input-group">
+                <!-- 1. Anzahl Zimmer -->
                 <div class="control-item">
                     <div class="control-header">
                         <label class="control-label" for="input-zimmer">Anzahl Zimmer</label>
@@ -718,6 +786,7 @@
                     <span class="control-note">Gesamtzimmeranzahl des Hotelbetriebs</span>
                 </div>
                 
+                <!-- 2. Wasserhärte -->
                 <div class="control-item">
                     <div class="control-header">
                         <label class="control-label" for="input-hardness">Wasserhärte</label>
@@ -727,480 +796,442 @@
                     <span class="control-note">Härtebereich: 10=mittel, 20=hart, 30=sehr hart</span>
                 </div>
 
+                <!-- 3. Stundenlohn Housekeeping -->
                 <div class="control-item">
                     <div class="control-header">
-                        <label class="control-label" for="input-wage">Housekeeping Lohn</label>
-                        <span class="control-value" id="val-wage">18 €</span>
+                        <label class="control-label" for="input-wage">Housekeeping-Lohn</label>
+                        <span class="control-value" id="val-wage">18 €/h</span>
                     </div>
                     <input type="range" class="control-input" id="input-wage" min="12" max="30" value="18" step="0.5">
-                    <span class="control-note">Stundensatz Housekeeping inkl. Lohnnebenkosten</span>
+                    <span class="control-note">Stundensatz inkl. Arbeitgeber-Nebenkosten</span>
                 </div>
 
+                <!-- 4. Entkalkungszeit -->
                 <div class="control-item">
                     <div class="control-header">
                         <label class="control-label" for="input-clean-time">Entkalkungszeit / Monat</label>
                         <span class="control-value" id="val-clean-time">15 Min</span>
                     </div>
                     <input type="range" class="control-input" id="input-clean-time" min="5" max="45" value="15" step="1">
-                    <span class="control-note">Minuten pro Zimmer/Monat (Armaturen, Duschköpfe)</span>
+                    <span class="control-note">Minuten pro Zimmer/Monat (Duschköpfe, Armaturen)</span>
                 </div>
 
+                <!-- 5. Kosten Entkalkungsmittel pro Zimmer/Monat -->
                 <div class="control-item">
                     <div class="control-header">
-                        <label class="control-label" for="input-chem-price">Preis Entkalkungschemie</label>
-                        <span class="control-value" id="val-chem-price">8 €</span>
+                        <label class="control-label" for="input-chem-room">Entkalkungsmittel / Zimmer</label>
+                        <span class="control-value" id="val-chem-room">0,64 €</span>
                     </div>
-                    <input type="range" class="control-input" id="input-chem-price" min="4" max="20" value="8" step="0.5">
-                    <span class="control-note">Durchschnittspreis Reinigungsmittel pro kg</span>
+                    <input type="range" class="control-input" id="input-chem-room" min="0.10" max="5.00" value="0.64" step="0.05">
+                    <span class="control-note">Reinigungsmittel-Kosten pro Zimmer und Monat</span>
                 </div>
 
+                <!-- 6. Wartungskosten Sanitär pro Jahr -->
                 <div class="control-item">
                     <div class="control-header">
-                        <label class="control-label" for="input-chem-use">Chemieverbrauch / Monat</label>
-                        <span class="control-value" id="val-chem-use">0.08 kg</span>
+                        <label class="control-label" for="input-maint-year">Wartungskosten Sanitär</label>
+                        <span class="control-value" id="val-maint-year">25.000 €</span>
                     </div>
-                    <input type="range" class="control-input" id="input-chem-use" min="0.01" max="0.5" value="0.08" step="0.01">
-                    <span class="control-note">Reinigungsmittel pro Zimmer/Monat</span>
+                    <input type="range" class="control-input" id="input-maint-year" min="5000" max="100000" value="25000" step="1000">
+                    <span class="control-note">Jährliche Kosten für Rohrleitungswartung & Küchengeräte</span>
                 </div>
 
+                <!-- 7. Wasserverbrauch pro Zimmer/Tag -->
                 <div class="control-item">
                     <div class="control-header">
-                        <label class="control-label" for="input-tech-wage">Lohn Haustechniker</label>
-                        <span class="control-value" id="val-tech-wage">25.000 €</span>
+                        <label class="control-label" for="input-water-day">Wasserverbrauch / Zimmer</label>
+                        <span class="control-value" id="val-water-day">150 l</span>
                     </div>
-                    <input type="range" class="control-input" id="input-tech-wage" min="15000" max="60000" value="25000" step="1000">
-                    <span class="control-note">Jahreslohn des Technikers für kalkbedingte Wartung</span>
+                    <input type="range" class="control-input" id="input-water-day" min="50" max="300" value="150" step="5">
+                    <span class="control-note">Wasserverbrauch pro Zimmer/Tag in Litern</span>
                 </div>
-            </div>
 
-            <!-- Section: Lösung & Investitionskosten -->
-            <div class="sidebar-title">LÖSUNG & INVESTITION</div>
-            <div class="input-group">
+                <!-- 8. Chemikalienkosten Pool pro Monat -->
                 <div class="control-item">
                     <div class="control-header">
-                        <label class="control-label" for="input-invest">Investition einmalig</label>
-                        <span class="control-value" id="val-invest">12.000 €</span>
+                        <label class="control-label" for="input-pool-chem">Pool-Chemikalien / Monat</label>
+                        <span class="control-value" id="val-pool-chem">583 €</span>
                     </div>
-                    <input type="range" class="control-input" id="input-invest" min="2000" max="50000" value="12000" step="500">
-                    <span class="control-note">Anschaffungs- und Installationskosten</span>
+                    <input type="range" class="control-input" id="input-pool-chem" min="100" max="2000" value="583" step="50">
+                    <span class="control-note">Monatlicher Aufwand für Pool/Kühltürme & Chlorierung</span>
                 </div>
 
+                <!-- 9. Auslastungsquote -->
                 <div class="control-item">
                     <div class="control-header">
-                        <label class="control-label" for="input-license">Jährliche Gebühr</label>
-                        <span class="control-value" id="val-license">1.800 €</span>
+                        <label class="control-label" for="input-occupancy">Auslastungsquote</label>
+                        <span class="control-value" id="val-occupancy">70 %</span>
                     </div>
-                    <input type="range" class="control-input" id="input-license" min="200" max="10000" value="1800" step="100">
-                    <span class="control-note">Jährliche Lizenz, Wartung & Monitoring</span>
+                    <input type="range" class="control-input" id="input-occupancy" min="30" max="100" value="70" step="5">
+                    <span class="control-note">Durchschnittliche Jahresbelegung des Hotels</span>
                 </div>
 
-                <div class="control-item" style="background: rgba(16, 185, 129, 0.05);">
+                <!-- 10. Amortisationszeit (Inverted calculation parameter) -->
+                <div class="control-item highlight-amort">
                     <div class="control-header">
-                        <label class="control-label" for="input-chain" style="color: var(--color-secondary);">Kettengröße (Hotels)</label>
-                        <span class="control-value" id="val-chain" style="background: rgba(16, 185, 129, 0.15); color: var(--color-secondary);">1</span>
+                        <label class="control-label" for="input-amort" style="color: var(--color-secondary);">Amortisationszeit</label>
+                        <span class="control-value" id="val-amort">0,75 Jahre</span>
                     </div>
-                    <input type="range" class="control-input" id="input-chain" min="1" max="100" value="1" step="1">
-                    <span class="control-note">Simuliert Hochrechnung auf Hotelkette/Gruppe</span>
+                    <input type="range" class="control-input" id="input-amort" min="0.2" max="3.0" value="0.75" step="0.05">
+                    <span class="control-note" style="color: var(--text-secondary);">Gewünschte Amortisationszeit für die Investition</span>
                 </div>
             </div>
         </aside>
 
         <!-- Main dashboard content -->
         <main class="main-content">
+            <!-- Print Letterhead (Only visible during PDF printing) -->
+            <div id="print-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="font-family: var(--font-display); font-size: 2rem; color: #0f172a; margin: 0;">MATpure – Kostenindikation</h2>
+                        <p style="font-size: 0.9rem; color: #475569; margin-top: 4px;">Kalkablagerungsprävention & Wirtschaftlichkeitsanalyse</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h3 id="print-lead-name" style="font-size: 1.1rem; color: #0f172a; margin: 0;">Erstellt für: Kunde</h3>
+                        <p id="print-lead-company" style="font-size: 0.9rem; color: #475569;">Firma</p>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;" id="print-date">Datum: 01.07.2026</p>
+                    </div>
+                </div>
+            </div>
+
             <header class="dashboard-header">
                 <div class="header-info">
-                    <h1>Hotel ROI Dashboard</h1>
-                    <p>Kalkablagerungsprävention & Investitionsanalyse mit der MolAquaTech-Technologie</p>
+                    <h1>Wirtschaftlichkeits-Kalkulator</h1>
+                    <p>Werten Sie das Einsparungspotenzial durch die MATpure-Kalkprävention aus</p>
                 </div>
-                <!-- Navigation Tabs -->
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-line"></i> ROI Analyse</button>
-                    <button class="tab-btn" onclick="switchTab('pilot')"><i class="fa-solid fa-clipboard-check"></i> Pilot Tracking</button>
-                </div>
+                <button class="btn-pdf" onclick="openLeadModal()"><i class="fa-solid fa-file-pdf"></i> Kostenindikation anfordern (PDF)</button>
             </header>
 
-            <!-- TAB 1: ROI DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content active">
+            <!-- KPI Row -->
+            <section class="kpi-grid">
+                <div class="kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Kalkkosten / Jahr (Ø)</span>
+                        <div class="kpi-icon"><i class="fa-solid fa-calculator"></i></div>
+                    </div>
+                    <div class="kpi-value" id="kpi-total-kalk">31.854 €</div>
+                    <div class="kpi-detail" id="kpi-total-kalk-detail">Min: 21.215 € | Max: 42.493 €</div>
+                </div>
                 
-                <!-- KPI Section -->
-                <section class="kpi-grid">
-                    <div class="kpi-card kpi-cyan">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Kalkkosten / Jahr (Ø)</span>
-                            <div class="kpi-icon"><i class="fa-solid fa-calculator"></i></div>
-                        </div>
-                        <div class="kpi-value" id="kpi-total-kalk">32.937 €</div>
-                        <div class="kpi-detail" id="kpi-total-kalk-detail">Min: 21.909 € | Max: 43.965 €</div>
+                <div class="kpi-card kpi-highlight">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Jährliche Einsparung (Netto)</span>
+                        <div class="kpi-icon"><i class="fa-solid fa-piggy-bank"></i></div>
                     </div>
-                    <div class="kpi-card kpi-highlight">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Netto-Einsparung / Jahr</span>
-                            <div class="kpi-icon"><i class="fa-solid fa-piggy-bank"></i></div>
-                        </div>
-                        <div class="kpi-value" id="kpi-net-savings">16.315 €</div>
-                        <div class="kpi-detail" id="kpi-net-savings-detail">Nach Lizenzkosten</div>
-                    </div>
-                    <div class="kpi-card kpi-highlight">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Amortisationszeit</span>
-                            <div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div>
-                        </div>
-                        <div class="kpi-value" id="kpi-amort">0,7 Jahre</div>
-                        <div class="kpi-detail" id="kpi-amort-detail">ca. 9 Monate</div>
-                    </div>
-                    <div class="kpi-card kpi-highlight">
-                        <div class="kpi-header">
-                            <span class="kpi-title">ROI nach 3 Jahren</span>
-                            <div class="kpi-icon"><i class="fa-solid fa-chart-simple"></i></div>
-                        </div>
-                        <div class="kpi-value" id="kpi-roi">307,9 %</div>
-                        <div class="kpi-detail" id="kpi-roi-detail">Nettorendite über 3 Jahre</div>
-                    </div>
-                </section>
+                    <div class="kpi-value" id="kpi-net-savings">15.720 €</div>
+                    <div class="kpi-detail" id="kpi-net-savings-detail">Berechnetes Einsparungspotenzial</div>
+                </div>
 
-                <!-- Charts and Cost Breakdown Section -->
-                <section class="dashboard-grid">
-                    <div class="chart-box">
-                        <div class="chart-header">
-                            <span class="chart-title">5-Jahre Cashflow-Entwicklung</span>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fa-solid fa-circle" style="color: var(--color-secondary); margin-right: 4px;"></i> Kumulierter Ertrag</div>
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="chart-cashflow"></canvas>
-                        </div>
+                <div class="kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Amortisation (Zielwert)</span>
+                        <div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div>
                     </div>
+                    <div class="kpi-value" id="kpi-amort-display">0,75 Jahre</div>
+                    <div class="kpi-detail">Vorgegebene Zielvorgabe</div>
+                </div>
 
-                    <!-- Detailed Breakdown -->
-                    <div class="breakdown-card">
-                        <div>
-                            <span class="breakdown-title">Jährliche Kostenkategorien</span>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Aktuelles Sparpotenzial pro Jahr vor Lösungsimplementierung</p>
-                        </div>
-                        <div class="cost-list">
-                            <div class="cost-row">
-                                <div class="cost-info">
-                                    <span class="cost-name">Housekeeping Personalkosten</span>
-                                    <span class="cost-formula">Zimmer × Zeit × 12 × Lohn</span>
-                                </div>
-                                <div class="cost-values">
-                                    <span class="min-val" id="cost-hk-min">5.400 €</span>
-                                    <span class="max-val" id="cost-hk-max">9.000 €</span>
-                                </div>
-                            </div>
-                            <div class="cost-row">
-                                <div class="cost-info">
-                                    <span class="cost-name">Reinigungschemikalien</span>
-                                    <span class="cost-formula">Zimmer × kg × 12 × Preis/kg</span>
-                                </div>
-                                <div class="cost-values">
-                                    <span class="min-val" id="cost-chem-min">922 €</span>
-                                    <span class="max-val" id="cost-chem-max">1.152 €</span>
-                                </div>
-                            </div>
-                            <div class="cost-row">
-                                <div class="cost-info">
-                                    <span class="cost-name">Wartungskosten (Armaturen/Geräte)</span>
-                                    <span class="cost-formula">Anteil Haustechnikerlohn (25% - 45%)</span>
-                                </div>
-                                <div class="cost-values">
-                                    <span class="min-val" id="cost-maint-min">6.250 €</span>
-                                    <span class="max-val" id="cost-maint-max">11.250 €</span>
-                                </div>
-                            </div>
-                            <div class="cost-row">
-                                <div class="cost-info">
-                                    <span class="cost-name">Legionellenprüfung & Maßnahmen</span>
-                                    <span class="cost-formula">Pauschalschätzung nach Hotelgröße</span>
-                                </div>
-                                <div class="cost-values">
-                                    <span class="min-val" id="cost-leg-min">5.000 €</span>
-                                    <span class="max-val" id="cost-leg-max">12.000 €</span>
-                                </div>
-                            </div>
-                            <div class="cost-row">
-                                <div class="cost-info">
-                                    <span class="cost-name">Pool: Chemie & Elektrolyse</span>
-                                    <span class="cost-formula">Pauschale bei vorhandenem Pool</span>
-                                </div>
-                                <div class="cost-values">
-                                    <span class="min-val" id="cost-pool-min">4.000 €</span>
-                                    <span class="max-val" id="cost-pool-max">10.000 €</span>
-                                </div>
-                            </div>
-                            <div class="cost-row">
-                                <div class="cost-info">
-                                    <span class="cost-name">Energiemehrverbrauch Warmwasser</span>
-                                    <span class="cost-formula">Kalkisolierung Heizelemente (15% - 25%)</span>
-                                </div>
-                                <div class="cost-values">
-                                    <span class="min-val" id="cost-energy-min">338 €</span>
-                                    <span class="max-val" id="cost-energy-max">563 €</span>
-                                </div>
-                            </div>
-                        </div>
+                <div class="kpi-card kpi-highlight">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Investitions-Richtwert</span>
+                        <div class="kpi-icon"><i class="fa-solid fa-scale-balanced"></i></div>
                     </div>
-                </section>
+                    <div class="kpi-value" id="kpi-invest-indicator">13.204 €</div>
+                    <div class="kpi-detail" id="kpi-invest-indicator-detail">MATpure Zielbudget (inkl. Marge)</div>
+                </div>
+            </section>
 
-                <!-- High-performance Chain Rollout simulation -->
-                <section class="rollout-card">
-                    <div class="rollout-header">
-                        <div class="rollout-text">
-                            <h3>Ketten-Hochrechnung</h3>
-                            <p>Skalierungseffekte bei der Ausstattung mehrerer Standorte</p>
-                        </div>
-                        <div class="tabs" style="border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05);">
-                            <div style="color: var(--color-secondary); padding: 8px 16px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                                <i class="fa-solid fa-network-wired"></i> <span id="chain-count-txt">1</span> Hotel(s) aktiv
+            <!-- Dashboard Charts and Breakdown -->
+            <section class="dashboard-grid">
+                <!-- Cashflow Chart -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <span class="chart-title">Kumulierter Ertragsverlauf über 5 Jahre</span>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fa-solid fa-circle" style="color: var(--color-secondary); margin-right: 4px;"></i> Kumulierter Ertrag</div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-cashflow"></canvas>
+                    </div>
+                </div>
+
+                <!-- Cost Breakdown List -->
+                <div class="breakdown-card">
+                    <div class="breakdown-title-container">
+                        <span class="breakdown-title">Kostenaufteilung (Aktueller Zustand)</span>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Aktuelles Schadens- und Sparpotenzial pro Jahr vor MATpure</p>
+                    </div>
+                    <div class="cost-list">
+                        <div class="cost-row">
+                            <div class="cost-info">
+                                <span class="cost-name">Housekeeping Personalkosten</span>
+                                <span class="cost-formula">Belegte Zimmer × Zeit/Monat × 12 × Lohn</span>
+                            </div>
+                            <div class="cost-values">
+                                <span class="min-val" id="cost-hk-min">4.320 €</span>
+                                <span class="max-val" id="cost-hk-max">6.480 €</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="rollout-stats">
-                        <div class="rollout-stat-box">
-                            <div class="rollout-stat-label">Gesamte Kalkkosten / Jahr</div>
-                            <div class="rollout-stat-val" id="chain-kalk">32.937 €</div>
+                        <div class="cost-row">
+                            <div class="cost-info">
+                                <span class="cost-name">Reinigungschemikalien</span>
+                                <span class="cost-formula">Belegte Zimmer × kg × 12 × Preis/kg</span>
+                            </div>
+                            <div class="cost-values">
+                                <span class="min-val" id="cost-chem-min">774 €</span>
+                                <span class="max-val" id="cost-chem-max">968 €</span>
+                            </div>
                         </div>
-                        <div class="rollout-stat-box">
-                            <div class="rollout-stat-label">Gesamtinvestition</div>
-                            <div class="rollout-stat-val" id="chain-invest">12.000 €</div>
+                        <div class="cost-row">
+                            <div class="cost-info">
+                                <span class="cost-name">Wartungskosten (Sanitär/Küche)</span>
+                                <span class="cost-formula">Haustechnik & Armaturen (25% - 45% kalkbedingt)</span>
+                            </div>
+                            <div class="cost-values">
+                                <span class="min-val" id="cost-maint-min">6.250 €</span>
+                                <span class="max-val" id="cost-maint-max">11.250 €</span>
+                            </div>
                         </div>
-                        <div class="rollout-stat-box">
-                            <div class="rollout-stat-label">Bruttoeinsparung / Jahr</div>
-                            <div class="rollout-stat-val highlight" id="chain-savings">18.115 €</div>
+                        <div class="cost-row">
+                            <div class="cost-info">
+                                <span class="cost-name">Legionellenprüfung & Maßnahmen</span>
+                                <span class="cost-formula">Risikomanagement skaliert nach Hotelgröße</span>
+                            </div>
+                            <div class="cost-values">
+                                <span class="min-val" id="cost-leg-min">5.000 €</span>
+                                <span class="max-val" id="cost-leg-max">12.000 €</span>
+                            </div>
                         </div>
-                        <div class="rollout-stat-box">
-                            <div class="rollout-stat-label">Amortisation Kette</div>
-                            <div class="rollout-stat-val" id="chain-amort">0,7 Jahre</div>
+                        <div class="cost-row">
+                            <div class="cost-info">
+                                <span class="cost-name">Pool: Chemie & Elektrolyse</span>
+                                <span class="cost-formula">Aufwand für Chlorierung & Algenprophylaxe</span>
+                            </div>
+                            <div class="cost-values">
+                                <span class="min-val" id="cost-pool-min">4.900 €</span>
+                                <span class="max-val" id="cost-pool-max">9.100 €</span>
+                            </div>
                         </div>
-                        <div class="rollout-stat-box" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">
-                            <div class="rollout-stat-label" style="color: var(--color-secondary);">Reingewinn (5 Jahre)</div>
-                            <div class="rollout-stat-val highlight" id="chain-profit" style="font-size: 1.4rem;">69.575 €</div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <!-- TAB 2: PILOT TRACKING -->
-            <div id="tab-pilot" class="tab-content">
-                <div class="pilot-layout">
-                    <!-- Messwerte Tabelle -->
-                    <div class="pilot-table-card">
-                        <div class="breakdown-title"><i class="fa-solid fa-list-check" style="color: var(--color-primary); margin-right: 6px;"></i> Pilot Tracking Messwerte</div>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Erfassen Sie die IST-Werte während der 90-Tage Testphase. Die prozentuale Veränderung berechnet sich vollautomatisch.</p>
-                        
-                        <table class="pilot-table">
-                            <thead>
-                                <tr>
-                                    <th>Messparameter</th>
-                                    <th>Baseline (Tag 0)</th>
-                                    <th>Monat 1 (Tag 30)</th>
-                                    <th>Monat 2 (Tag 60)</th>
-                                    <th>Abschluss (Tag 90)</th>
-                                    <th>Veränderung</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Durchfluss Duschköpfe (l/min, Ø)</td>
-                                    <td><input type="number" class="pilot-input" id="p-flow-b" value="12.0" step="0.1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-flow-m1" value="11.5" step="0.1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-flow-m2" value="10.8" step="0.1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-flow-m3" value="9.8" step="0.1" oninput="updatePilot()"></td>
-                                    <td><span class="pilot-change-badge" id="p-flow-change">-18,3%</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Chemieverbrauch Entkalker (kg/Monat)</td>
-                                    <td><input type="number" class="pilot-input" id="p-chem-b" value="12.0" step="0.5" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-chem-m1" value="9.5" step="0.5" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-chem-m2" value="7.0" step="0.5" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-chem-m3" value="5.5" step="0.5" oninput="updatePilot()"></td>
-                                    <td><span class="pilot-change-badge" id="p-chem-change">-54,2%</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Wirkungsgrad Elektrolyse (%)</td>
-                                    <td><input type="number" class="pilot-input" id="p-eff-b" value="75" step="1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-eff-m1" value="82" step="1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-eff-m2" value="88" step="1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-eff-m3" value="92" step="1" oninput="updatePilot()"></td>
-                                    <td><span class="pilot-change-badge" id="p-eff-change">+22,7%</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Warmwasser Temperaturschwankung (°C)</td>
-                                    <td><input type="number" class="pilot-input" id="p-temp-b" value="4.2" step="0.1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-temp-m1" value="3.5" step="0.1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-temp-m2" value="2.1" step="0.1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-temp-m3" value="1.2" step="0.1" oninput="updatePilot()"></td>
-                                    <td><span class="pilot-change-badge" id="p-temp-change">-71,4%</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Wartungsaufrufe Küche/Geräte (Anzahl)</td>
-                                    <td><input type="number" class="pilot-input" id="p-maint-b" value="5" step="1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-maint-m1" value="4" step="1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-maint-m2" value="2" step="1" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-maint-m3" value="1" step="1" oninput="updatePilot()"></td>
-                                    <td><span class="pilot-change-badge" id="p-maint-change">-80,0%</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Legionellenbelastung (KBE/100ml)</td>
-                                    <td><input type="number" class="pilot-input" id="p-leg-b" value="450" step="10" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-leg-m1" value="320" step="10" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-leg-m2" value="110" step="10" oninput="updatePilot()"></td>
-                                    <td><input type="number" class="pilot-input" id="p-leg-m3" value="10" step="10" oninput="updatePilot()"></td>
-                                    <td><span class="pilot-change-badge" id="p-leg-change">-97,8%</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pilot Trend Graph -->
-                    <div class="chart-box">
-                        <div class="chart-header">
-                            <span class="chart-title">Verlaufskurve (relativ zur Baseline)</span>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Baseline = 100%</div>
-                        </div>
-                        <div class="chart-wrapper" style="height: 380px;">
-                            <canvas id="chart-pilot"></canvas>
+                        <div class="cost-row">
+                            <div class="cost-info">
+                                <span class="cost-name">Energiemehrverbrauch Warmwasser</span>
+                                <span class="cost-formula">Kalk-Dämmschicht (15% - 25% Verlust)</span>
+                            </div>
+                            <div class="cost-values">
+                                <span class="min-val" id="cost-energy-min">315 €</span>
+                                <span class="max-val" id="cost-energy-max">525 €</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Footer info -->
-            <footer style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+            <!-- Assumptions Transparency section -->
+            <section class="assumptions-card">
+                <div class="assumptions-title">
+                    <i class="fa-solid fa-circle-info" style="color: var(--color-primary);"></i>
+                    <span>Berechnungsgrundlagen & Annahmen</span>
+                </div>
+                <div class="assumptions-grid">
+                    <div class="assumption-item">
+                        <span class="assumption-label">Auslastungs-Kalkulation</span>
+                        <span class="assumption-val" id="asm-occupancy">Basierend auf 70% Jahresauslastung (105 belegte Zimmer/Tag).</span>
+                    </div>
+                    <div class="assumption-item">
+                        <span class="assumption-label">Entkalkungs-Arbeit</span>
+                        <span class="assumption-val" id="asm-housekeeping">15 Min/Monat pro Zimmer zu 18,00 €/Std (Housekeeping-Lohn).</span>
+                    </div>
+                    <div class="assumption-item">
+                        <span class="assumption-label">Einsparungsquote</span>
+                        <span class="assumption-val" id="asm-saving-rate">Konservativ angesetzte Einsparungsquote von 55% der Kalkkosten (bei 20 °dH).</span>
+                    </div>
+                    <div class="assumption-item">
+                        <span class="assumption-label">Warmwasser-Energieverlust</span>
+                        <span class="assumption-val" id="asm-energy">Kalk-Verkrustung verursacht 15% bis 25% Energiemehrverbrauch bei der Erwärmung.</span>
+                    </div>
+                    <div class="assumption-item">
+                        <span class="assumption-label">System-Richtwert (Safety Margin)</span>
+                        <span class="assumption-val">Der Investitions-Richtwert enthält 12% Sicherheitsreserve für eventuelle Installations-Besonderheiten.</span>
+                    </div>
+                    <div class="assumption-item">
+                        <span class="assumption-label">Unverbindlichkeit</span>
+                        <span class="assumption-val">Die Ergebnisse basieren auf den eingegebenen Parametern. Abweichungen im Realbetrieb sind möglich.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1.25rem; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
                 <span>MolAquaTech GmbH © 2026 – Kalkschutz-Investitionseffizienz</span>
-                <span>*Alle Berechnungen basieren auf den validierten Werten der Hotel-Excelvorlage.</span>
+                <span>Dies ist eine unverbindliche Kostenindikation auf Basis Ihrer Eingaben. Für ein verbindliches Angebot kontaktieren Sie uns.</span>
             </footer>
         </main>
     </div>
 
-    <script>
-        // Global variables for Chart instances
-        let cashflowChart = null;
-        let pilotChart = null;
-
-        // Switch Tabs logic
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            const eventTarget = window.event ? window.event.currentTarget : null;
-            if (eventTarget) {
-                eventTarget.classList.add('active');
-            } else {
-                // Fallback for button query
-                if (tabId === 'dashboard') {
-                    document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
-                } else {
-                    document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
-                }
-            }
-
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+    <!-- Lead Capture Modal Popup -->
+    <div class="modal-overlay" id="lead-modal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeLeadModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h3>Kostenindikation anfordern</h3>
+                <p>Geben Sie Ihre Daten ein, um das PDF-Indikationsdatenblatt mit all Ihren individuellen Berechnungen zu drucken.</p>
+            </div>
             
-            // Re-render chart on tab switch to avoid sizing glitches
-            setTimeout(() => {
-                if (tabId === 'dashboard') {
-                    if (cashflowChart) cashflowChart.resize();
-                } else if (tabId === 'pilot') {
-                    if (pilotChart) {
-                        pilotChart.resize();
-                        updatePilot();
-                    }
-                }
-            }, 50);
+            <form onsubmit="generatePDF(event)" style="display: flex; flex-direction: column; gap: 1.15rem;">
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label" for="f-vorname">Vorname *</label>
+                        <input type="text" class="form-input" id="f-vorname" required placeholder="z. B. Max">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label" for="f-nachname">Nachname *</label>
+                        <input type="text" class="form-input" id="f-nachname" required placeholder="z. B. Mustermann">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="f-firma">Firma *</label>
+                    <input type="text" class="form-input" id="f-firma" required placeholder="z. B. Musterhotel GmbH">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="f-email">E-Mail-Adresse *</label>
+                    <input type="email" class="form-input" id="f-email" required placeholder="z. B. max@musterhotel.de">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="f-tel">Telefonnummer *</label>
+                    <input type="tel" class="form-input" id="f-tel" required placeholder="z. B. +49 123 456789">
+                </div>
+
+                <label class="form-checkbox-label">
+                    <input type="checkbox" required>
+                    <span>Ich stimme zu, dass MolAquaTech mich bezüglich der unverbindlichen Kostenindikation und eines Angebots kontaktieren darf. *</span>
+                </label>
+
+                <button type="submit" class="btn-submit"><i class="fa-solid fa-file-pdf"></i> PDF-Kostenindikation generieren</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        const CONFIG = {
+            SAFETY_MARGIN: 0.12,          // 12% safety margin added on public price ind.
+            DEFAULT_ANNUAL_LICENSE: 1800  // Default annual license fee (subtracted to get Nettoeinsparung)
+        };
+
+        let cashflowChart = null;
+
+        // Modal triggers
+        function openLeadModal() {
+            document.getElementById('lead-modal').style.display = 'flex';
         }
 
-        // Calculation logic and UI update
+        function closeLeadModal() {
+            document.getElementById('lead-modal').style.display = 'none';
+        }
+
+        // Calculation logic
         function updateCalculations() {
             // Read inputs
             const zimmer = parseFloat(document.getElementById('input-zimmer').value);
             const hardness = parseFloat(document.getElementById('input-hardness').value);
             const wage = parseFloat(document.getElementById('input-wage').value);
             const cleanTime = parseFloat(document.getElementById('input-clean-time').value);
-            const chemPrice = parseFloat(document.getElementById('input-chem-price').value);
-            const chemUse = parseFloat(document.getElementById('input-chem-use').value);
-            const techWage = parseFloat(document.getElementById('input-tech-wage').value);
-            
-            const invest = parseFloat(document.getElementById('input-invest').value);
-            const license = parseFloat(document.getElementById('input-license').value);
-            const chainSize = parseInt(document.getElementById('input-chain').value);
+            const chemRoom = parseFloat(document.getElementById('input-chem-room').value);
+            const maintYear = parseFloat(document.getElementById('input-maint-year').value);
+            const waterDay = parseFloat(document.getElementById('input-water-day').value);
+            const poolChem = parseFloat(document.getElementById('input-pool-chem').value);
+            const occupancy = parseFloat(document.getElementById('input-occupancy').value);
+            const amort = parseFloat(document.getElementById('input-amort').value);
 
-            // Update labels
+            // Update UI Labels
             document.getElementById('val-zimmer').innerText = zimmer;
             document.getElementById('val-hardness').innerText = hardness + ' °dH';
-            document.getElementById('val-wage').innerText = wage + ' €';
+            document.getElementById('val-wage').innerText = wage + ' €/h';
             document.getElementById('val-clean-time').innerText = cleanTime + ' Min';
-            document.getElementById('val-chem-price').innerText = chemPrice + ' €';
-            document.getElementById('val-chem-use').innerText = chemUse.toFixed(2) + ' kg';
-            document.getElementById('val-tech-wage').innerText = techWage.toLocaleString('de-DE') + ' €';
-            document.getElementById('val-invest').innerText = invest.toLocaleString('de-DE') + ' €';
-            document.getElementById('val-license').innerText = license.toLocaleString('de-DE') + ' €';
-            document.getElementById('val-chain').innerText = chainSize;
-            document.getElementById('chain-count-txt').innerText = chainSize;
+            document.getElementById('val-chem-room').innerText = chemRoom.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('val-maint-year').innerText = maintYear.toLocaleString('de-DE') + ' €';
+            document.getElementById('val-water-day').innerText = waterDay + ' l';
+            document.getElementById('val-pool-chem').innerText = poolChem.toLocaleString('de-DE') + ' €';
+            document.getElementById('val-occupancy').innerText = occupancy + ' %';
+            document.getElementById('val-amort').innerText = amort.toFixed(2).replace('.', ',') + ' Jahre';
+            document.getElementById('kpi-amort-display').innerText = amort.toFixed(2).replace('.', ',') + ' Jahre';
 
-            // Calculations based on reverse-engineered formulas
-            // 1. Housekeeping Personalkosten
-            const hkWageMin = wage * (12/18);
-            const hkWageMax = wage * (20/18);
-            const hkMin = zimmer * (cleanTime / 60) * 12 * hkWageMin;
-            const hkMax = zimmer * (cleanTime / 60) * 12 * hkWageMax;
+            // 1. Occupied rooms
+            const occupiedRooms = zimmer * (occupancy / 100);
 
-            // 2. Reinigungschemikalien
-            const chemMax = zimmer * chemUse * 12 * chemPrice;
-            const chemMin = chemMax * 0.8;
+            // 2. Housekeeping Personalkosten
+            const hkMin = occupiedRooms * (cleanTime / 60) * 12 * wage * 0.8;
+            const hkMax = occupiedRooms * (cleanTime / 60) * 12 * wage * 1.2;
+            const hkAvg = (hkMin + hkMax) / 2;
 
-            // 3. Wartung
-            const maintMin = 0.25 * techWage;
-            const maintMax = 0.45 * techWage;
+            // 3. Reinigungschemikalien
+            const chemMin = occupiedRooms * chemRoom * 12 * 0.8;
+            const chemMax = occupiedRooms * chemRoom * 12 * 1.2;
+            const chemAvg = (chemMin + chemMax) / 2;
 
-            // 4. Legionellen (Pauschal 5000-12000, scaled by hotel size)
+            // 4. Wartungskosten (25% - 45%)
+            const maintMin = maintYear * 0.25;
+            const maintMax = maintYear * 0.45;
+            const maintAvg = (maintMin + maintMax) / 2;
+
+            // 5. Legionellen
             const legMin = 5000 * (zimmer / 150);
             const legMax = 12000 * (zimmer / 150);
+            const legAvg = (legMin + legMax) / 2;
 
-            // 5. Pool
-            const poolMin = 4000;
-            const poolMax = 10000;
+            // 6. Pool & Sonstige
+            const poolMin = poolChem * 12 * 0.7;
+            const poolMax = poolChem * 12 * 1.3;
+            const poolAvg = (poolMin + poolMax) / 2;
 
-            // 6. Energie
-            const energyMin = zimmer * 15 * 0.15;
-            const energyMax = zimmer * 15 * 0.25;
+            // 7. Energy (Warmwasser energy loss, scaled by occupancy, hardness, and water usage)
+            const energyBase = occupiedRooms * 15 * (waterDay / 150);
+            const energyMin = energyBase * 0.15 * (hardness / 20);
+            const energyMax = energyBase * 0.25 * (hardness / 20);
+            const energyAvg = (energyMin + energyMax) / 2;
 
             // Totals
             const totalMin = hkMin + chemMin + maintMin + legMin + poolMin + energyMin;
             const totalMax = hkMax + chemMax + maintMax + legMax + poolMax + energyMax;
             const totalAvg = (totalMin + totalMax) / 2;
 
-            // Savings rate based on water hardness
-            // Base 50% at 10 °dH, scales by 5% every 10 °dH. Min 40%, Max 75%
+            // Saving rate dependent on water hardness (Base 50% at 10 °dH, +/- 5% every 10 °dH, capped 40-75%)
             const savingRate = Math.min(0.75, Math.max(0.40, 0.50 + 0.05 * (hardness - 10) / 10));
             const savingRatePct = Math.round(savingRate * 100);
 
-            // Savings calculations
+            // Savings (Gross and Net)
             const expectedSavings = totalAvg * savingRate;
-            const netSavings = expectedSavings - license;
+            const netSavings = expectedSavings - CONFIG.DEFAULT_ANNUAL_LICENSE;
 
-            // Amortization & ROI
-            let amortTime = invest / netSavings;
-            if (netSavings <= 0) amortTime = Infinity;
-            const roi3Years = ((netSavings * 3) - invest) / invest;
+            // Inverted logic: Calculate maximum budget/investment based on amortization time input
+            // Math: Investitionskosten = Netto-Einsparung * Amortisationszeit
+            const rawInvestment = Math.max(0, netSavings * amort);
+            
+            // Apply SAFETY_MARGIN for the public displayed indication (Wirkaufendeinauto pricing strategy)
+            const publicInvestment = rawInvestment * (1 + CONFIG.SAFETY_MARGIN);
 
-            // Update UI fields
+            // ROI after 3 years
+            // (3 * Nettoeinsparung - Investition) / Investition
+            // For public display, we calculate ROI based on the public-facing higher investment (which is more conservative)
+            let publicRoi = 0;
+            if (publicInvestment > 0) {
+                publicRoi = ((netSavings * 3) - publicInvestment) / publicInvestment;
+            }
+
+            // Update KPI elements
             document.getElementById('kpi-total-kalk').innerText = Math.round(totalAvg).toLocaleString('de-DE') + ' €';
             document.getElementById('kpi-total-kalk-detail').innerText = `Min: ${Math.round(totalMin).toLocaleString('de-DE')} € | Max: ${Math.round(totalMax).toLocaleString('de-DE')} €`;
 
             document.getElementById('kpi-net-savings').innerText = Math.round(netSavings).toLocaleString('de-DE') + ' €';
-            document.getElementById('kpi-net-savings-detail').innerText = `Nach Gebühr (Ersparnis: ${Math.round(expectedSavings).toLocaleString('de-DE')} € | ${savingRatePct}%)`;
+            document.getElementById('kpi-net-savings-detail').innerText = `Netto (Brutto: ${Math.round(expectedSavings).toLocaleString('de-DE')} € | ${savingRatePct}% Einsparung)`;
 
-            if (isFinite(amortTime)) {
-                document.getElementById('kpi-amort').innerText = amortTime.toFixed(1).replace('.', ',') + ' Jahre';
-                document.getElementById('kpi-amort-detail').innerText = `ca. ${Math.round(amortTime * 12)} Monate`;
-            } else {
-                document.getElementById('kpi-amort').innerText = 'N/A';
-                document.getElementById('kpi-amort-detail').innerText = 'Kosten decken Gebühr nicht';
-            }
+            document.getElementById('kpi-invest-indicator').innerText = Math.round(publicInvestment).toLocaleString('de-DE') + ' €';
+            document.getElementById('kpi-invest-indicator-detail').innerText = `Zielbudget für Amortisation in ${amort.toFixed(2).replace('.', ',')} J.`;
 
-            document.getElementById('kpi-roi').innerText = (roi3Years * 100).toFixed(1).replace('.', ',') + ' %';
-
-            // Jährliche Kostenkategorien list update
+            // Cost breakdown update
             document.getElementById('cost-hk-min').innerText = Math.round(hkMin).toLocaleString('de-DE') + ' €';
             document.getElementById('cost-hk-max').innerText = Math.round(hkMax).toLocaleString('de-DE') + ' €';
             document.getElementById('cost-chem-min').innerText = Math.round(chemMin).toLocaleString('de-DE') + ' €';
@@ -1214,33 +1245,25 @@
             document.getElementById('cost-energy-min').innerText = Math.round(energyMin).toLocaleString('de-DE') + ' €';
             document.getElementById('cost-energy-max').innerText = Math.round(energyMax).toLocaleString('de-DE') + ' €';
 
-            // Ketten-Hochrechnung
-            const chainKalk = totalAvg * chainSize;
-            const chainInvest = invest * chainSize;
-            const chainSavings = expectedSavings * chainSize;
-            const chainNetSavings = netSavings * chainSize;
-            const chainAmort = chainInvest / chainNetSavings;
-            const chainProfit5Years = (chainNetSavings * 5) - chainInvest;
+            // Assumptions update
+            document.getElementById('asm-occupancy').innerText = `Basierend auf ${occupancy}% Jahresauslastung (${Math.round(occupiedRooms)} belegte Zimmer/Tag).`;
+            document.getElementById('asm-housekeeping').innerText = `${cleanTime} Min/Monat pro Zimmer zu ${wage.toFixed(2).replace('.', ',')} €/Std (Housekeeping-Lohn).`;
+            document.getElementById('asm-saving-rate').innerText = `Konservativ angesetzte Einsparungsquote von ${savingRatePct}% der Kalkkosten (bei ${hardness} °dH).`;
+            document.getElementById('asm-energy').innerText = `Kalk-Verkrustung verursacht 15% bis 25% Energiemehrverbrauch bei der Erwärmung (skaliert mit ${waterDay} l Verbrauch und ${hardness} °dH Härte).`;
 
-            document.getElementById('chain-kalk').innerText = Math.round(chainKalk).toLocaleString('de-DE') + ' €';
-            document.getElementById('chain-invest').innerText = Math.round(chainInvest).toLocaleString('de-DE') + ' €';
-            document.getElementById('chain-savings').innerText = Math.round(chainSavings).toLocaleString('de-DE') + ' €';
-            document.getElementById('chain-amort').innerText = isFinite(chainAmort) ? chainAmort.toFixed(1).replace('.', ',') + ' Jahre' : 'N/A';
-            document.getElementById('chain-profit').innerText = Math.round(chainProfit5Years).toLocaleString('de-DE') + ' €';
-
-            // Render/Update charts
-            updateCashflowChart(invest, netSavings);
+            // Render Cashflow Line Chart
+            updateCashflowChart(publicInvestment, netSavings, amort);
         }
 
-        // Cashflow Chart logic
-        function updateCashflowChart(invest, netSavings) {
+        // Cashflow Chart render
+        function updateCashflowChart(investment, netSavings, amort) {
             const data = [
-                -invest,
-                -invest + netSavings * 1,
-                -invest + netSavings * 2,
-                -invest + netSavings * 3,
-                -invest + netSavings * 4,
-                -invest + netSavings * 5
+                -investment,
+                -investment + netSavings * 1,
+                -investment + netSavings * 2,
+                -investment + netSavings * 3,
+                -investment + netSavings * 4,
+                -investment + netSavings * 5
             ];
 
             const ctx = document.getElementById('chart-cashflow').getContext('2d');
@@ -1249,15 +1272,15 @@
                 cashflowChart.data.datasets[0].data = data;
                 cashflowChart.update();
             } else {
-                Chart.defaults.color = '#9ca3af';
+                Chart.defaults.color = '#94a3b8';
                 Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
                 
                 cashflowChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: ['Jahr 0 (Start)', 'Jahr 1', 'Jahr 2', 'Jahr 3', 'Jahr 4', 'Jahr 5'],
+                        labels: ['Start (Jahr 0)', 'Jahr 1', 'Jahr 2', 'Jahr 3', 'Jahr 4', 'Jahr 5'],
                         datasets: [{
-                            label: 'Kumulierter Ertrag (€)',
+                            label: 'Kumulierte Einsparung (€)',
                             data: data,
                             borderColor: '#10b981',
                             borderWidth: 3,
@@ -1266,7 +1289,7 @@
                             pointRadius: 5,
                             fill: true,
                             backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                            tension: 0.2
+                            tension: 0.15
                         }]
                     },
                     options: {
@@ -1276,12 +1299,12 @@
                             legend: { display: false },
                             tooltip: {
                                 padding: 12,
-                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
                                 borderColor: 'rgba(255, 255, 255, 0.08)',
                                 borderWidth: 1,
                                 callbacks: {
                                     label: function(context) {
-                                        return ' ' + context.parsed.y.toLocaleString('de-DE') + ' €';
+                                        return ' ' + context.parsed.y.toLocaleString('de-DE', { maximumFractionDigits: 0 }) + ' €';
                                     }
                                 }
                             }
@@ -1304,181 +1327,35 @@
             }
         }
 
-        // Pilot Tracking calculations
-        function calculateChange(base, target, isPositiveImprovement = false) {
-            if (base === 0) return 0;
-            const diff = ((target - base) / base) * 100;
-            return diff;
+        // PDF Generation Trigger
+        function generatePDF(event) {
+            event.preventDefault();
+
+            // Read lead fields
+            const vorname = document.getElementById('f-vorname').value;
+            const nachname = document.getElementById('f-nachname').value;
+            const firma = document.getElementById('f-firma').value;
+
+            // Put lead info on print header
+            document.getElementById('print-lead-name').innerText = `Erstellt für: ${vorname} ${nachname}`;
+            document.getElementById('print-lead-company').innerText = firma;
+            document.getElementById('print-date').innerText = `Datum: ${new Date().toLocaleDateString('de-DE')}`;
+
+            // Close the modal
+            closeLeadModal();
+
+            // Open OS printer dialog
+            window.print();
         }
 
-        function updatePilotBadge(elementId, changePct, isLowerBetter = true) {
-            const badge = document.getElementById(elementId);
-            const formatted = (changePct >= 0 ? '+' : '') + changePct.toFixed(1).replace('.', ',') + '%';
-            badge.innerText = formatted;
-
-            badge.className = 'pilot-change-badge';
-            if (Math.abs(changePct) < 0.1) {
-                badge.classList.add('neutral');
-            } else if ((changePct < 0 && isLowerBetter) || (changePct > 0 && !isLowerBetter)) {
-                badge.classList.add('positive');
-            } else {
-                badge.classList.add('negative');
-            }
-        }
-
-        function updatePilot() {
-            // Read inputs
-            const flowB = parseFloat(document.getElementById('p-flow-b').value) || 0;
-            const flowM1 = parseFloat(document.getElementById('p-flow-m1').value) || 0;
-            const flowM2 = parseFloat(document.getElementById('p-flow-m2').value) || 0;
-            const flowM3 = parseFloat(document.getElementById('p-flow-m3').value) || 0;
-
-            const chemB = parseFloat(document.getElementById('p-chem-b').value) || 0;
-            const chemM1 = parseFloat(document.getElementById('p-chem-m1').value) || 0;
-            const chemM2 = parseFloat(document.getElementById('p-chem-m2').value) || 0;
-            const chemM3 = parseFloat(document.getElementById('p-chem-m3').value) || 0;
-
-            const effB = parseFloat(document.getElementById('p-eff-b').value) || 0;
-            const effM1 = parseFloat(document.getElementById('p-eff-m1').value) || 0;
-            const effM2 = parseFloat(document.getElementById('p-eff-m2').value) || 0;
-            const effM3 = parseFloat(document.getElementById('p-eff-m3').value) || 0;
-
-            const tempB = parseFloat(document.getElementById('p-temp-b').value) || 0;
-            const tempM1 = parseFloat(document.getElementById('p-temp-m1').value) || 0;
-            const tempM2 = parseFloat(document.getElementById('p-temp-m2').value) || 0;
-            const tempM3 = parseFloat(document.getElementById('p-temp-m3').value) || 0;
-
-            const maintB = parseFloat(document.getElementById('p-maint-b').value) || 0;
-            const maintM1 = parseFloat(document.getElementById('p-maint-m1').value) || 0;
-            const maintM2 = parseFloat(document.getElementById('p-maint-m2').value) || 0;
-            const maintM3 = parseFloat(document.getElementById('p-maint-m3').value) || 0;
-
-            const legB = parseFloat(document.getElementById('p-leg-b').value) || 0;
-            const legM1 = parseFloat(document.getElementById('p-leg-m1').value) || 0;
-            const legM2 = parseFloat(document.getElementById('p-leg-m2').value) || 0;
-            const legM3 = parseFloat(document.getElementById('p-leg-m3').value) || 0;
-
-            // Calculate change badges
-            updatePilotBadge('p-flow-change', calculateChange(flowB, flowM3), true);
-            updatePilotBadge('p-chem-change', calculateChange(chemB, chemM3), true);
-            updatePilotBadge('p-eff-change', calculateChange(effB, effM3), false); // higher efficiency is better
-            updatePilotBadge('p-temp-change', calculateChange(tempB, tempM3), true);
-            updatePilotBadge('p-maint-change', calculateChange(maintB, maintM3), true);
-            updatePilotBadge('p-leg-change', calculateChange(legB, legM3), true);
-
-            // Relative values to baseline (Baseline = 100%)
-            const getRel = (b, v) => b === 0 ? 100 : (v / b) * 100;
-
-            const flowData = [100, getRel(flowB, flowM1), getRel(flowB, flowM2), getRel(flowB, flowM3)];
-            const chemData = [100, getRel(chemB, chemM1), getRel(chemB, chemM2), getRel(chemB, chemM3)];
-            const effData = [100, getRel(effB, effM1), getRel(effB, effM2), getRel(effB, effM3)];
-            const tempData = [100, getRel(tempB, tempM1), getRel(tempB, tempM2), getRel(tempB, tempM3)];
-            const maintData = [100, getRel(maintB, maintM1), getRel(maintB, maintM2), getRel(maintB, maintM3)];
-
-            // Render/Update Pilot Chart
-            const ctx = document.getElementById('chart-pilot').getContext('2d');
-            
-            if (pilotChart) {
-                pilotChart.data.datasets[0].data = flowData;
-                pilotChart.data.datasets[1].data = chemData;
-                pilotChart.data.datasets[2].data = effData;
-                pilotChart.data.datasets[3].data = tempData;
-                pilotChart.data.datasets[4].data = maintData;
-                pilotChart.update();
-            } else {
-                pilotChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Baseline', 'Monat 1', 'Monat 2', 'Monat 3 (Abschluss)'],
-                        datasets: [
-                            {
-                                label: 'Duschkopf-Durchfluss',
-                                data: flowData,
-                                borderColor: '#3b82f6',
-                                backgroundColor: 'transparent',
-                                borderWidth: 2.5,
-                                tension: 0.1
-                            },
-                            {
-                                label: 'Chemieverbrauch',
-                                data: chemData,
-                                borderColor: '#06b6d4',
-                                backgroundColor: 'transparent',
-                                borderWidth: 2.5,
-                                tension: 0.1
-                            },
-                            {
-                                label: 'Wirkungsgrad Elektrolyse',
-                                data: effData,
-                                borderColor: '#10b981',
-                                backgroundColor: 'transparent',
-                                borderWidth: 2.5,
-                                tension: 0.1
-                            },
-                            {
-                                label: 'WW-Temperaturschwankung',
-                                data: tempData,
-                                borderColor: '#f59e0b',
-                                backgroundColor: 'transparent',
-                                borderWidth: 2.5,
-                                tension: 0.1
-                            },
-                            {
-                                label: 'Haustechnik-Einsätze',
-                                data: maintData,
-                                borderColor: '#ef4444',
-                                backgroundColor: 'transparent',
-                                borderWidth: 2.5,
-                                tension: 0.1
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { boxWidth: 12, padding: 15 }
-                            },
-                            tooltip: {
-                                padding: 12,
-                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                                borderColor: 'rgba(255, 255, 255, 0.08)',
-                                borderWidth: 1,
-                                callbacks: {
-                                    label: function(context) {
-                                        return ' ' + context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                                ticks: {
-                                    callback: function(value) {
-                                        return value + '%';
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: { display: false }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        // Initialize event listeners
+        // Startup triggers
         window.addEventListener('DOMContentLoaded', () => {
             const inputs = document.querySelectorAll('.control-input');
             inputs.forEach(input => {
                 input.addEventListener('input', updateCalculations);
             });
 
-            // Initial calculation
+            // Initial render
             updateCalculations();
         });
     </script>
