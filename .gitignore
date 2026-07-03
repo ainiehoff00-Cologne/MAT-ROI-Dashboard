@@ -1,0 +1,11 @@
+# Temporary python scripts and reports
+inspect_excel.py
+excel_report.txt
+excel_report_pilot.txt
+
+# Local IDE/workspace folders
+.idea/
+.vscode/
+.git/
+.agents/
+.gemini/

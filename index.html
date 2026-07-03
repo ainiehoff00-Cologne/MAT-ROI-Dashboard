@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MolAquaTech – ROI Rechner & Pilot Tracking Dashboard</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Tailored color palette */
+            --bg-main: #090d16;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-card-hover: rgba(23, 32, 53, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(6, 182, 212, 0.15);
+            
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            
+            --color-primary: #06b6d4;      /* Cyan (Water / Technology) */
+            --color-secondary: #10b981;    /* Emerald (Savings / ROI) */
+            --color-accent: #f59e0b;       /* Amber (Inputs / Warning) */
+            --color-danger: #ef4444;       /* Red (Costs) */
+            
+            --color-primary-rgb: 6, 182, 212;
+            --color-secondary-rgb: 16, 185, 129;
+            --color-accent-rgb: 245, 158, 11;
+            
+            --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            --gradient-savings: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-dark: linear-gradient(180deg, #111827 0%, #030712 100%);
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Container Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 380px;
+            background: rgba(10, 15, 26, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2.2rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(6, 182, 212, 0.4));
+        }
+
+        .logo-text {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--color-primary);
+            -webkit-text-fill-color: var(--color-primary);
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-primary);
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Inputs Container */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .control-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .control-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(6, 182, 212, 0.2);
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .control-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            background: rgba(6, 182, 212, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .control-input {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            margin: 0.5rem 0;
+        }
+
+        .control-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+            transition: transform 0.1s ease;
+        }
+
+        .control-input::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .control-note {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            flex: 1;
+            padding: 2rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header.dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+
+        .header-info h1 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-info p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: fit-content;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--color-primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            background: var(--bg-card-hover);
+            border-color: rgba(6, 182, 212, 0.2);
+            box-shadow: var(--shadow-glow), var(--shadow-lg);
+        }
+
+        .kpi-card.kpi-highlight::before {
+            background: var(--gradient-savings);
+        }
+        .kpi-card.kpi-highlight:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), var(--shadow-lg);
+        }
+
+        .kpi-card.kpi-cyan::before {
+            background: var(--gradient-primary);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .kpi-icon {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .kpi-card.kpi-highlight .kpi-icon {
+            color: var(--color-secondary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .kpi-card.kpi-cyan .kpi-icon {
+            color: var(--color-primary);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .kpi-value {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .kpi-detail {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .kpi-detail i {
+            font-size: 0.75rem;
+        }
+
+        /* Dashboard Main Layout (Charts & Tables) */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .chart-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* List Cards / Cost Breakdown */
+        .breakdown-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .breakdown-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .cost-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .cost-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .cost-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cost-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .cost-formula {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .cost-values {
+            text-align: right;
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .cost-values .min-val {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-right: 6px;
+        }
+
+        .cost-values .max-val {
+            color: var(--color-danger);
+        }
+
+        /* Rollout Section */
+        .rollout-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.04) 0%, rgba(6, 182, 212, 0.04) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .rollout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rollout-text h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #10b981, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .rollout-text p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .rollout-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+
+        .rollout-stat-box {
+            background: rgba(10, 15, 26, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .rollout-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .rollout-stat-val {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .rollout-stat-val.highlight {
+            color: var(--color-secondary);
+        }
+
+        /* Pilot Tracking Tab Styling */
+        .pilot-layout {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 1.5rem;
+        }
+
+        .pilot-table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pilot-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .pilot-table th, .pilot-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+        }
+
+        .pilot-table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .pilot-input {
+            width: 80px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 6px 10px;
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-weight: 700;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .pilot-input:focus {
+            border-color: var(--color-primary);
+            background: rgba(6, 182, 212, 0.1);
+            box-shadow: 0 0 5px rgba(6, 182, 212, 0.3);
+        }
+
+        .pilot-change-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .pilot-change-badge.positive {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-secondary);
+        }
+
+        .pilot-change-badge.negative {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+        }
+
+        .pilot-change-badge.neutral {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .dashboard-grid, .pilot-layout {
+                grid-template-columns: 1fr;
+            }
+            .rollout-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            .rollout-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar controls (Inputs) -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <i class="fa-solid fa-droplet logo-icon"></i>
+                <div class="logo-text">MolAqua<span>Tech</span></div>
+            </div>
+            
+            <!-- Section: Hotelprofil -->
+            <div class="sidebar-title">EINGABEN – Hotelprofil</div>
+            <div class="input-group">
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-zimmer">Anzahl Zimmer</label>
+                        <span class="control-value" id="val-zimmer">150</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-zimmer" min="20" max="500" value="150" step="5">
+                    <span class="control-note">Gesamtzimmeranzahl des Hotelbetriebs</span>
+                </div>
+                
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-hardness">Wasserhärte</label>
+                        <span class="control-value" id="val-hardness">20 °dH</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-hardness" min="5" max="40" value="20" step="1">
+                    <span class="control-note">Härtebereich: 10=mittel, 20=hart, 30=sehr hart</span>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-wage">Housekeeping Lohn</label>
+                        <span class="control-value" id="val-wage">18 €</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-wage" min="12" max="30" value="18" step="0.5">
+                    <span class="control-note">Stundensatz Housekeeping inkl. Lohnnebenkosten</span>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-clean-time">Entkalkungszeit / Monat</label>
+                        <span class="control-value" id="val-clean-time">15 Min</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-clean-time" min="5" max="45" value="15" step="1">
+                    <span class="control-note">Minuten pro Zimmer/Monat (Armaturen, Duschköpfe)</span>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-chem-price">Preis Entkalkungschemie</label>
+                        <span class="control-value" id="val-chem-price">8 €</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-chem-price" min="4" max="20" value="8" step="0.5">
+                    <span class="control-note">Durchschnittspreis Reinigungsmittel pro kg</span>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-chem-use">Chemieverbrauch / Monat</label>
+                        <span class="control-value" id="val-chem-use">0.08 kg</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-chem-use" min="0.01" max="0.5" value="0.08" step="0.01">
+                    <span class="control-note">Reinigungsmittel pro Zimmer/Monat</span>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-tech-wage">Lohn Haustechniker</label>
+                        <span class="control-value" id="val-tech-wage">25.000 €</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-tech-wage" min="15000" max="60000" value="25000" step="1000">
+                    <span class="control-note">Jahreslohn des Technikers für kalkbedingte Wartung</span>
+                </div>
+            </div>
+
+            <!-- Section: Lösung & Investitionskosten -->
+            <div class="sidebar-title">LÖSUNG & INVESTITION</div>
+            <div class="input-group">
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-invest">Investition einmalig</label>
+                        <span class="control-value" id="val-invest">12.000 €</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-invest" min="2000" max="50000" value="12000" step="500">
+                    <span class="control-note">Anschaffungs- und Installationskosten</span>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-header">
+                        <label class="control-label" for="input-license">Jährliche Gebühr</label>
+                        <span class="control-value" id="val-license">1.800 €</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-license" min="200" max="10000" value="1800" step="100">
+                    <span class="control-note">Jährliche Lizenz, Wartung & Monitoring</span>
+                </div>
+
+                <div class="control-item" style="background: rgba(16, 185, 129, 0.05);">
+                    <div class="control-header">
+                        <label class="control-label" for="input-chain" style="color: var(--color-secondary);">Kettengröße (Hotels)</label>
+                        <span class="control-value" id="val-chain" style="background: rgba(16, 185, 129, 0.15); color: var(--color-secondary);">1</span>
+                    </div>
+                    <input type="range" class="control-input" id="input-chain" min="1" max="100" value="1" step="1">
+                    <span class="control-note">Simuliert Hochrechnung auf Hotelkette/Gruppe</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main dashboard content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-info">
+                    <h1>Hotel ROI Dashboard</h1>
+                    <p>Kalkablagerungsprävention & Investitionsanalyse mit der MolAquaTech-Technologie</p>
+                </div>
+                <!-- Navigation Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-line"></i> ROI Analyse</button>
+                    <button class="tab-btn" onclick="switchTab('pilot')"><i class="fa-solid fa-clipboard-check"></i> Pilot Tracking</button>
+                </div>
+            </header>
+
+            <!-- TAB 1: ROI DASHBOARD -->
+            <div id="tab-dashboard" class="tab-content active">
+                
+                <!-- KPI Section -->
+                <section class="kpi-grid">
+                    <div class="kpi-card kpi-cyan">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Kalkkosten / Jahr (Ø)</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-calculator"></i></div>
+                        </div>
+                        <div class="kpi-value" id="kpi-total-kalk">32.937 €</div>
+                        <div class="kpi-detail" id="kpi-total-kalk-detail">Min: 21.909 € | Max: 43.965 €</div>
+                    </div>
+                    <div class="kpi-card kpi-highlight">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Netto-Einsparung / Jahr</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                        </div>
+                        <div class="kpi-value" id="kpi-net-savings">16.315 €</div>
+                        <div class="kpi-detail" id="kpi-net-savings-detail">Nach Lizenzkosten</div>
+                    </div>
+                    <div class="kpi-card kpi-highlight">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Amortisationszeit</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                        </div>
+                        <div class="kpi-value" id="kpi-amort">0,7 Jahre</div>
+                        <div class="kpi-detail" id="kpi-amort-detail">ca. 9 Monate</div>
+                    </div>
+                    <div class="kpi-card kpi-highlight">
+                        <div class="kpi-header">
+                            <span class="kpi-title">ROI nach 3 Jahren</span>
+                            <div class="kpi-icon"><i class="fa-solid fa-chart-simple"></i></div>
+                        </div>
+                        <div class="kpi-value" id="kpi-roi">307,9 %</div>
+                        <div class="kpi-detail" id="kpi-roi-detail">Nettorendite über 3 Jahre</div>
+                    </div>
+                </section>
+
+                <!-- Charts and Cost Breakdown Section -->
+                <section class="dashboard-grid">
+                    <div class="chart-box">
+                        <div class="chart-header">
+                            <span class="chart-title">5-Jahre Cashflow-Entwicklung</span>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fa-solid fa-circle" style="color: var(--color-secondary); margin-right: 4px;"></i> Kumulierter Ertrag</div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-cashflow"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Breakdown -->
+                    <div class="breakdown-card">
+                        <div>
+                            <span class="breakdown-title">Jährliche Kostenkategorien</span>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Aktuelles Sparpotenzial pro Jahr vor Lösungsimplementierung</p>
+                        </div>
+                        <div class="cost-list">
+                            <div class="cost-row">
+                                <div class="cost-info">
+                                    <span class="cost-name">Housekeeping Personalkosten</span>
+                                    <span class="cost-formula">Zimmer × Zeit × 12 × Lohn</span>
+                                </div>
+                                <div class="cost-values">
+                                    <span class="min-val" id="cost-hk-min">5.400 €</span>
+                                    <span class="max-val" id="cost-hk-max">9.000 €</span>
+                                </div>
+                            </div>
+                            <div class="cost-row">
+                                <div class="cost-info">
+                                    <span class="cost-name">Reinigungschemikalien</span>
+                                    <span class="cost-formula">Zimmer × kg × 12 × Preis/kg</span>
+                                </div>
+                                <div class="cost-values">
+                                    <span class="min-val" id="cost-chem-min">922 €</span>
+                                    <span class="max-val" id="cost-chem-max">1.152 €</span>
+                                </div>
+                            </div>
+                            <div class="cost-row">
+                                <div class="cost-info">
+                                    <span class="cost-name">Wartungskosten (Armaturen/Geräte)</span>
+                                    <span class="cost-formula">Anteil Haustechnikerlohn (25% - 45%)</span>
+                                </div>
+                                <div class="cost-values">
+                                    <span class="min-val" id="cost-maint-min">6.250 €</span>
+                                    <span class="max-val" id="cost-maint-max">11.250 €</span>
+                                </div>
+                            </div>
+                            <div class="cost-row">
+                                <div class="cost-info">
+                                    <span class="cost-name">Legionellenprüfung & Maßnahmen</span>
+                                    <span class="cost-formula">Pauschalschätzung nach Hotelgröße</span>
+                                </div>
+                                <div class="cost-values">
+                                    <span class="min-val" id="cost-leg-min">5.000 €</span>
+                                    <span class="max-val" id="cost-leg-max">12.000 €</span>
+                                </div>
+                            </div>
+                            <div class="cost-row">
+                                <div class="cost-info">
+                                    <span class="cost-name">Pool: Chemie & Elektrolyse</span>
+                                    <span class="cost-formula">Pauschale bei vorhandenem Pool</span>
+                                </div>
+                                <div class="cost-values">
+                                    <span class="min-val" id="cost-pool-min">4.000 €</span>
+                                    <span class="max-val" id="cost-pool-max">10.000 €</span>
+                                </div>
+                            </div>
+                            <div class="cost-row">
+                                <div class="cost-info">
+                                    <span class="cost-name">Energiemehrverbrauch Warmwasser</span>
+                                    <span class="cost-formula">Kalkisolierung Heizelemente (15% - 25%)</span>
+                                </div>
+                                <div class="cost-values">
+                                    <span class="min-val" id="cost-energy-min">338 €</span>
+                                    <span class="max-val" id="cost-energy-max">563 €</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- High-performance Chain Rollout simulation -->
+                <section class="rollout-card">
+                    <div class="rollout-header">
+                        <div class="rollout-text">
+                            <h3>Ketten-Hochrechnung</h3>
+                            <p>Skalierungseffekte bei der Ausstattung mehrerer Standorte</p>
+                        </div>
+                        <div class="tabs" style="border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05);">
+                            <div style="color: var(--color-secondary); padding: 8px 16px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-network-wired"></i> <span id="chain-count-txt">1</span> Hotel(s) aktiv
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rollout-stats">
+                        <div class="rollout-stat-box">
+                            <div class="rollout-stat-label">Gesamte Kalkkosten / Jahr</div>
+                            <div class="rollout-stat-val" id="chain-kalk">32.937 €</div>
+                        </div>
+                        <div class="rollout-stat-box">
+                            <div class="rollout-stat-label">Gesamtinvestition</div>
+                            <div class="rollout-stat-val" id="chain-invest">12.000 €</div>
+                        </div>
+                        <div class="rollout-stat-box">
+                            <div class="rollout-stat-label">Bruttoeinsparung / Jahr</div>
+                            <div class="rollout-stat-val highlight" id="chain-savings">18.115 €</div>
+                        </div>
+                        <div class="rollout-stat-box">
+                            <div class="rollout-stat-label">Amortisation Kette</div>
+                            <div class="rollout-stat-val" id="chain-amort">0,7 Jahre</div>
+                        </div>
+                        <div class="rollout-stat-box" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">
+                            <div class="rollout-stat-label" style="color: var(--color-secondary);">Reingewinn (5 Jahre)</div>
+                            <div class="rollout-stat-val highlight" id="chain-profit" style="font-size: 1.4rem;">69.575 €</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 2: PILOT TRACKING -->
+            <div id="tab-pilot" class="tab-content">
+                <div class="pilot-layout">
+                    <!-- Messwerte Tabelle -->
+                    <div class="pilot-table-card">
+                        <div class="breakdown-title"><i class="fa-solid fa-list-check" style="color: var(--color-primary); margin-right: 6px;"></i> Pilot Tracking Messwerte</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Erfassen Sie die IST-Werte während der 90-Tage Testphase. Die prozentuale Veränderung berechnet sich vollautomatisch.</p>
+                        
+                        <table class="pilot-table">
+                            <thead>
+                                <tr>
+                                    <th>Messparameter</th>
+                                    <th>Baseline (Tag 0)</th>
+                                    <th>Monat 1 (Tag 30)</th>
+                                    <th>Monat 2 (Tag 60)</th>
+                                    <th>Abschluss (Tag 90)</th>
+                                    <th>Veränderung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Durchfluss Duschköpfe (l/min, Ø)</td>
+                                    <td><input type="number" class="pilot-input" id="p-flow-b" value="12.0" step="0.1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-flow-m1" value="11.5" step="0.1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-flow-m2" value="10.8" step="0.1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-flow-m3" value="9.8" step="0.1" oninput="updatePilot()"></td>
+                                    <td><span class="pilot-change-badge" id="p-flow-change">-18,3%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Chemieverbrauch Entkalker (kg/Monat)</td>
+                                    <td><input type="number" class="pilot-input" id="p-chem-b" value="12.0" step="0.5" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-chem-m1" value="9.5" step="0.5" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-chem-m2" value="7.0" step="0.5" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-chem-m3" value="5.5" step="0.5" oninput="updatePilot()"></td>
+                                    <td><span class="pilot-change-badge" id="p-chem-change">-54,2%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Wirkungsgrad Elektrolyse (%)</td>
+                                    <td><input type="number" class="pilot-input" id="p-eff-b" value="75" step="1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-eff-m1" value="82" step="1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-eff-m2" value="88" step="1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-eff-m3" value="92" step="1" oninput="updatePilot()"></td>
+                                    <td><span class="pilot-change-badge" id="p-eff-change">+22,7%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Warmwasser Temperaturschwankung (°C)</td>
+                                    <td><input type="number" class="pilot-input" id="p-temp-b" value="4.2" step="0.1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-temp-m1" value="3.5" step="0.1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-temp-m2" value="2.1" step="0.1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-temp-m3" value="1.2" step="0.1" oninput="updatePilot()"></td>
+                                    <td><span class="pilot-change-badge" id="p-temp-change">-71,4%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Wartungsaufrufe Küche/Geräte (Anzahl)</td>
+                                    <td><input type="number" class="pilot-input" id="p-maint-b" value="5" step="1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-maint-m1" value="4" step="1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-maint-m2" value="2" step="1" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-maint-m3" value="1" step="1" oninput="updatePilot()"></td>
+                                    <td><span class="pilot-change-badge" id="p-maint-change">-80,0%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Legionellenbelastung (KBE/100ml)</td>
+                                    <td><input type="number" class="pilot-input" id="p-leg-b" value="450" step="10" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-leg-m1" value="320" step="10" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-leg-m2" value="110" step="10" oninput="updatePilot()"></td>
+                                    <td><input type="number" class="pilot-input" id="p-leg-m3" value="10" step="10" oninput="updatePilot()"></td>
+                                    <td><span class="pilot-change-badge" id="p-leg-change">-97,8%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pilot Trend Graph -->
+                    <div class="chart-box">
+                        <div class="chart-header">
+                            <span class="chart-title">Verlaufskurve (relativ zur Baseline)</span>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Baseline = 100%</div>
+                        </div>
+                        <div class="chart-wrapper" style="height: 380px;">
+                            <canvas id="chart-pilot"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer info -->
+            <footer style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 1rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                <span>MolAquaTech GmbH © 2026 – Kalkschutz-Investitionseffizienz</span>
+                <span>*Alle Berechnungen basieren auf den validierten Werten der Hotel-Excelvorlage.</span>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Global variables for Chart instances
+        let cashflowChart = null;
+        let pilotChart = null;
+
+        // Switch Tabs logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            const eventTarget = window.event ? window.event.currentTarget : null;
+            if (eventTarget) {
+                eventTarget.classList.add('active');
+            } else {
+                // Fallback for button query
+                if (tabId === 'dashboard') {
+                    document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                } else {
+                    document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                }
+            }
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Re-render chart on tab switch to avoid sizing glitches
+            setTimeout(() => {
+                if (tabId === 'dashboard') {
+                    if (cashflowChart) cashflowChart.resize();
+                } else if (tabId === 'pilot') {
+                    if (pilotChart) {
+                        pilotChart.resize();
+                        updatePilot();
+                    }
+                }
+            }, 50);
+        }
+
+        // Calculation logic and UI update
+        function updateCalculations() {
+            // Read inputs
+            const zimmer = parseFloat(document.getElementById('input-zimmer').value);
+            const hardness = parseFloat(document.getElementById('input-hardness').value);
+            const wage = parseFloat(document.getElementById('input-wage').value);
+            const cleanTime = parseFloat(document.getElementById('input-clean-time').value);
+            const chemPrice = parseFloat(document.getElementById('input-chem-price').value);
+            const chemUse = parseFloat(document.getElementById('input-chem-use').value);
+            const techWage = parseFloat(document.getElementById('input-tech-wage').value);
+            
+            const invest = parseFloat(document.getElementById('input-invest').value);
+            const license = parseFloat(document.getElementById('input-license').value);
+            const chainSize = parseInt(document.getElementById('input-chain').value);
+
+            // Update labels
+            document.getElementById('val-zimmer').innerText = zimmer;
+            document.getElementById('val-hardness').innerText = hardness + ' °dH';
+            document.getElementById('val-wage').innerText = wage + ' €';
+            document.getElementById('val-clean-time').innerText = cleanTime + ' Min';
+            document.getElementById('val-chem-price').innerText = chemPrice + ' €';
+            document.getElementById('val-chem-use').innerText = chemUse.toFixed(2) + ' kg';
+            document.getElementById('val-tech-wage').innerText = techWage.toLocaleString('de-DE') + ' €';
+            document.getElementById('val-invest').innerText = invest.toLocaleString('de-DE') + ' €';
+            document.getElementById('val-license').innerText = license.toLocaleString('de-DE') + ' €';
+            document.getElementById('val-chain').innerText = chainSize;
+            document.getElementById('chain-count-txt').innerText = chainSize;
+
+            // Calculations based on reverse-engineered formulas
+            // 1. Housekeeping Personalkosten
+            const hkWageMin = wage * (12/18);
+            const hkWageMax = wage * (20/18);
+            const hkMin = zimmer * (cleanTime / 60) * 12 * hkWageMin;
+            const hkMax = zimmer * (cleanTime / 60) * 12 * hkWageMax;
+
+            // 2. Reinigungschemikalien
+            const chemMax = zimmer * chemUse * 12 * chemPrice;
+            const chemMin = chemMax * 0.8;
+
+            // 3. Wartung
+            const maintMin = 0.25 * techWage;
+            const maintMax = 0.45 * techWage;
+
+            // 4. Legionellen (Pauschal 5000-12000, scaled by hotel size)
+            const legMin = 5000 * (zimmer / 150);
+            const legMax = 12000 * (zimmer / 150);
+
+            // 5. Pool
+            const poolMin = 4000;
+            const poolMax = 10000;
+
+            // 6. Energie
+            const energyMin = zimmer * 15 * 0.15;
+            const energyMax = zimmer * 15 * 0.25;
+
+            // Totals
+            const totalMin = hkMin + chemMin + maintMin + legMin + poolMin + energyMin;
+            const totalMax = hkMax + chemMax + maintMax + legMax + poolMax + energyMax;
+            const totalAvg = (totalMin + totalMax) / 2;
+
+            // Savings rate based on water hardness
+            // Base 50% at 10 °dH, scales by 5% every 10 °dH. Min 40%, Max 75%
+            const savingRate = Math.min(0.75, Math.max(0.40, 0.50 + 0.05 * (hardness - 10) / 10));
+            const savingRatePct = Math.round(savingRate * 100);
+
+            // Savings calculations
+            const expectedSavings = totalAvg * savingRate;
+            const netSavings = expectedSavings - license;
+
+            // Amortization & ROI
+            let amortTime = invest / netSavings;
+            if (netSavings <= 0) amortTime = Infinity;
+            const roi3Years = ((netSavings * 3) - invest) / invest;
+
+            // Update UI fields
+            document.getElementById('kpi-total-kalk').innerText = Math.round(totalAvg).toLocaleString('de-DE') + ' €';
+            document.getElementById('kpi-total-kalk-detail').innerText = `Min: ${Math.round(totalMin).toLocaleString('de-DE')} € | Max: ${Math.round(totalMax).toLocaleString('de-DE')} €`;
+
+            document.getElementById('kpi-net-savings').innerText = Math.round(netSavings).toLocaleString('de-DE') + ' €';
+            document.getElementById('kpi-net-savings-detail').innerText = `Nach Gebühr (Ersparnis: ${Math.round(expectedSavings).toLocaleString('de-DE')} € | ${savingRatePct}%)`;
+
+            if (isFinite(amortTime)) {
+                document.getElementById('kpi-amort').innerText = amortTime.toFixed(1).replace('.', ',') + ' Jahre';
+                document.getElementById('kpi-amort-detail').innerText = `ca. ${Math.round(amortTime * 12)} Monate`;
+            } else {
+                document.getElementById('kpi-amort').innerText = 'N/A';
+                document.getElementById('kpi-amort-detail').innerText = 'Kosten decken Gebühr nicht';
+            }
+
+            document.getElementById('kpi-roi').innerText = (roi3Years * 100).toFixed(1).replace('.', ',') + ' %';
+
+            // Jährliche Kostenkategorien list update
+            document.getElementById('cost-hk-min').innerText = Math.round(hkMin).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-hk-max').innerText = Math.round(hkMax).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-chem-min').innerText = Math.round(chemMin).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-chem-max').innerText = Math.round(chemMax).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-maint-min').innerText = Math.round(maintMin).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-maint-max').innerText = Math.round(maintMax).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-leg-min').innerText = Math.round(legMin).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-leg-max').innerText = Math.round(legMax).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-pool-min').innerText = Math.round(poolMin).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-pool-max').innerText = Math.round(poolMax).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-energy-min').innerText = Math.round(energyMin).toLocaleString('de-DE') + ' €';
+            document.getElementById('cost-energy-max').innerText = Math.round(energyMax).toLocaleString('de-DE') + ' €';
+
+            // Ketten-Hochrechnung
+            const chainKalk = totalAvg * chainSize;
+            const chainInvest = invest * chainSize;
+            const chainSavings = expectedSavings * chainSize;
+            const chainNetSavings = netSavings * chainSize;
+            const chainAmort = chainInvest / chainNetSavings;
+            const chainProfit5Years = (chainNetSavings * 5) - chainInvest;
+
+            document.getElementById('chain-kalk').innerText = Math.round(chainKalk).toLocaleString('de-DE') + ' €';
+            document.getElementById('chain-invest').innerText = Math.round(chainInvest).toLocaleString('de-DE') + ' €';
+            document.getElementById('chain-savings').innerText = Math.round(chainSavings).toLocaleString('de-DE') + ' €';
+            document.getElementById('chain-amort').innerText = isFinite(chainAmort) ? chainAmort.toFixed(1).replace('.', ',') + ' Jahre' : 'N/A';
+            document.getElementById('chain-profit').innerText = Math.round(chainProfit5Years).toLocaleString('de-DE') + ' €';
+
+            // Render/Update charts
+            updateCashflowChart(invest, netSavings);
+        }
+
+        // Cashflow Chart logic
+        function updateCashflowChart(invest, netSavings) {
+            const data = [
+                -invest,
+                -invest + netSavings * 1,
+                -invest + netSavings * 2,
+                -invest + netSavings * 3,
+                -invest + netSavings * 4,
+                -invest + netSavings * 5
+            ];
+
+            const ctx = document.getElementById('chart-cashflow').getContext('2d');
+            
+            if (cashflowChart) {
+                cashflowChart.data.datasets[0].data = data;
+                cashflowChart.update();
+            } else {
+                Chart.defaults.color = '#9ca3af';
+                Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+                
+                cashflowChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jahr 0 (Start)', 'Jahr 1', 'Jahr 2', 'Jahr 3', 'Jahr 4', 'Jahr 5'],
+                        datasets: [{
+                            label: 'Kumulierter Ertrag (€)',
+                            data: data,
+                            borderColor: '#10b981',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#10b981',
+                            pointHoverRadius: 8,
+                            pointRadius: 5,
+                            fill: true,
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                padding: 12,
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                borderColor: 'rgba(255, 255, 255, 0.08)',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.parsed.y.toLocaleString('de-DE') + ' €';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString('de-DE') + ' €';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Pilot Tracking calculations
+        function calculateChange(base, target, isPositiveImprovement = false) {
+            if (base === 0) return 0;
+            const diff = ((target - base) / base) * 100;
+            return diff;
+        }
+
+        function updatePilotBadge(elementId, changePct, isLowerBetter = true) {
+            const badge = document.getElementById(elementId);
+            const formatted = (changePct >= 0 ? '+' : '') + changePct.toFixed(1).replace('.', ',') + '%';
+            badge.innerText = formatted;
+
+            badge.className = 'pilot-change-badge';
+            if (Math.abs(changePct) < 0.1) {
+                badge.classList.add('neutral');
+            } else if ((changePct < 0 && isLowerBetter) || (changePct > 0 && !isLowerBetter)) {
+                badge.classList.add('positive');
+            } else {
+                badge.classList.add('negative');
+            }
+        }
+
+        function updatePilot() {
+            // Read inputs
+            const flowB = parseFloat(document.getElementById('p-flow-b').value) || 0;
+            const flowM1 = parseFloat(document.getElementById('p-flow-m1').value) || 0;
+            const flowM2 = parseFloat(document.getElementById('p-flow-m2').value) || 0;
+            const flowM3 = parseFloat(document.getElementById('p-flow-m3').value) || 0;
+
+            const chemB = parseFloat(document.getElementById('p-chem-b').value) || 0;
+            const chemM1 = parseFloat(document.getElementById('p-chem-m1').value) || 0;
+            const chemM2 = parseFloat(document.getElementById('p-chem-m2').value) || 0;
+            const chemM3 = parseFloat(document.getElementById('p-chem-m3').value) || 0;
+
+            const effB = parseFloat(document.getElementById('p-eff-b').value) || 0;
+            const effM1 = parseFloat(document.getElementById('p-eff-m1').value) || 0;
+            const effM2 = parseFloat(document.getElementById('p-eff-m2').value) || 0;
+            const effM3 = parseFloat(document.getElementById('p-eff-m3').value) || 0;
+
+            const tempB = parseFloat(document.getElementById('p-temp-b').value) || 0;
+            const tempM1 = parseFloat(document.getElementById('p-temp-m1').value) || 0;
+            const tempM2 = parseFloat(document.getElementById('p-temp-m2').value) || 0;
+            const tempM3 = parseFloat(document.getElementById('p-temp-m3').value) || 0;
+
+            const maintB = parseFloat(document.getElementById('p-maint-b').value) || 0;
+            const maintM1 = parseFloat(document.getElementById('p-maint-m1').value) || 0;
+            const maintM2 = parseFloat(document.getElementById('p-maint-m2').value) || 0;
+            const maintM3 = parseFloat(document.getElementById('p-maint-m3').value) || 0;
+
+            const legB = parseFloat(document.getElementById('p-leg-b').value) || 0;
+            const legM1 = parseFloat(document.getElementById('p-leg-m1').value) || 0;
+            const legM2 = parseFloat(document.getElementById('p-leg-m2').value) || 0;
+            const legM3 = parseFloat(document.getElementById('p-leg-m3').value) || 0;
+
+            // Calculate change badges
+            updatePilotBadge('p-flow-change', calculateChange(flowB, flowM3), true);
+            updatePilotBadge('p-chem-change', calculateChange(chemB, chemM3), true);
+            updatePilotBadge('p-eff-change', calculateChange(effB, effM3), false); // higher efficiency is better
+            updatePilotBadge('p-temp-change', calculateChange(tempB, tempM3), true);
+            updatePilotBadge('p-maint-change', calculateChange(maintB, maintM3), true);
+            updatePilotBadge('p-leg-change', calculateChange(legB, legM3), true);
+
+            // Relative values to baseline (Baseline = 100%)
+            const getRel = (b, v) => b === 0 ? 100 : (v / b) * 100;
+
+            const flowData = [100, getRel(flowB, flowM1), getRel(flowB, flowM2), getRel(flowB, flowM3)];
+            const chemData = [100, getRel(chemB, chemM1), getRel(chemB, chemM2), getRel(chemB, chemM3)];
+            const effData = [100, getRel(effB, effM1), getRel(effB, effM2), getRel(effB, effM3)];
+            const tempData = [100, getRel(tempB, tempM1), getRel(tempB, tempM2), getRel(tempB, tempM3)];
+            const maintData = [100, getRel(maintB, maintM1), getRel(maintB, maintM2), getRel(maintB, maintM3)];
+
+            // Render/Update Pilot Chart
+            const ctx = document.getElementById('chart-pilot').getContext('2d');
+            
+            if (pilotChart) {
+                pilotChart.data.datasets[0].data = flowData;
+                pilotChart.data.datasets[1].data = chemData;
+                pilotChart.data.datasets[2].data = effData;
+                pilotChart.data.datasets[3].data = tempData;
+                pilotChart.data.datasets[4].data = maintData;
+                pilotChart.update();
+            } else {
+                pilotChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Baseline', 'Monat 1', 'Monat 2', 'Monat 3 (Abschluss)'],
+                        datasets: [
+                            {
+                                label: 'Duschkopf-Durchfluss',
+                                data: flowData,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2.5,
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Chemieverbrauch',
+                                data: chemData,
+                                borderColor: '#06b6d4',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2.5,
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Wirkungsgrad Elektrolyse',
+                                data: effData,
+                                borderColor: '#10b981',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2.5,
+                                tension: 0.1
+                            },
+                            {
+                                label: 'WW-Temperaturschwankung',
+                                data: tempData,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2.5,
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Haustechnik-Einsätze',
+                                data: maintData,
+                                borderColor: '#ef4444',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2.5,
+                                tension: 0.1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, padding: 15 }
+                            },
+                            tooltip: {
+                                padding: 12,
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                borderColor: 'rgba(255, 255, 255, 0.08)',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize event listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('.control-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateCalculations);
+            });
+
+            // Initial calculation
+            updateCalculations();
+        });
+    </script>
+</body>
+</html>
